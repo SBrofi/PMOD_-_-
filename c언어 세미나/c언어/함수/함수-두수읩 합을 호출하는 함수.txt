@@ -1,0 +1,17 @@
+#include<stdio.h>
+int add(int num1, int num2)
+	{
+		int tmp=0;
+		tmp = num1 + num2;
+		return tmp;
+	}
+int main()
+{
+	int a;
+	int b;
+	printf("\n정수1 : ");
+	scanf_s("%d", &a);
+	printf("\n정수2 : ");
+	scanf_s("%d", &b);
+	printf("\n%d는 두수의 총합", add(a,b));
+}

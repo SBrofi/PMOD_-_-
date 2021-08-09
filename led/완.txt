@@ -1,0 +1,82 @@
+
+#define __DELAY_BACKWARD_COMPATIBLE__
+#include <avr/io.h>
+#include <util/delay.h>
+int main()
+{
+	int i,led1,led2;
+	int t=2000;
+	int z=2000;
+	int g;
+  	DDRA=0xFF;		 //출력포트 설정
+	PORTA=0xFF;		 //꺼짐
+	DDRD=0x00;		 //입력포트 설정
+	while(1)
+	{
+		while(~PIND&0x08)	//4번 스위치 누를 때 홀수 번 누르면 스위치 1,3	
+		{
+			if(i%2==1)		//4번 스위치 홀수번 누를때 t,z값을 낮춤
+			{
+				t=500;
+				z=500;
+				g=500;
+				i++;
+				_delay_ms(1000);
+			}
+			else			//4번 스위치 짝수번 누를때 초기 t,z값으로 올림	
+			{
+				t=2000;
+				z=2000;
+				g=2000;
+				i++;
+				_delay_ms(1000);
+			}
+		}
+		if((~PIND&0x0F)==0x01)	//1번 스위치 누를 때
+		{	
+			led1=0x80;		//초기값 대입
+			for(i=0;i<8;i++)
+			{
+				PORTA=~led1;	// 반전하여 A포트에 출력(0x7F)
+				led1=(led1>>1);	//  1비트만큼 오른쪽으로 이동
+				_delay_ms(t);	// 시간 지연 함수(t)
+			}
+			PORTA=0xFF;		//꺼짐
+		}
+		else if((~PIND&0x0F)==0x02)	//2번 스위치 누를 때 홀수번 0x55, 짝수번 0xAA 출력
+		{
+			_delay_ms(500);
+			if(i%2==1)		//홀수번 키면 0x55출력
+			{
+				PORTA=0x55;
+				i++;
+				_delay_ms(2000);	// 시간 지연 함수
+			}
+			else			//짝수번 키면 0xAA출력
+			{
+				PORTA=0xAA;
+				i++;
+				_delay_ms(2000);	// 시간 지연 함수
+			}
+			PORTA=0xFF;		//꺼짐
+		}
+		else if(~PIND&0x04)	//3번 스위치 누르고 있으면 LED SHIFT 빨라짐
+		{
+			while(~PIND&0x04)	//3번 스위치 지속 적으로 누름
+			{
+				led2=0x80;	//초기값 대입
+				for(i=0;i<8;i++)
+				{
+					PORTA=~led2;	// 반전하여 A포트에 출력(0x7F)
+					led2=(led2>>1);	//  1비트만큼 오른쪽으로 이동
+					_delay_ms(z);	// 시간 지연 함수(t)
+				}
+				z=z/2;
+				i=0;
+				PORTA=0xFF;	//꺼짐
+				_delay_ms(500);
+			}
+			z=g;	//3번스위치 누르기 전 z값으로 되돌림
+		}
+	}
+}

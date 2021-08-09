@@ -1,0 +1,17 @@
+else if((~PIND&0x0F)==0x02)
+		{
+			_delay_ms(500);
+			if(i%2==1)
+			{
+				PORTA=0x55;
+				i++;
+				_delay_ms(2000);
+			}
+			else
+			{
+				PORTA=0xAA;
+				i++;
+				_delay_ms(2000);
+			}
+			PORTA=0xFF;
+		}

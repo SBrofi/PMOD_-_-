@@ -1,0 +1,18 @@
+	else if(~PIND&0x04)
+		{
+			t=2000;
+			while(~PIND&0x04)
+			{
+				led=0x80;
+				for(i=0;i<8;i++)
+				{
+					PORTA=~led;
+					led=(led>>1);
+					_delay_ms(t);
+				}
+				t=t/2;
+				i=0;
+				PORTA=0xFF;
+				_delay_ms(500);
+			}
+		}

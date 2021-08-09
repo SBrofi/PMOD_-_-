@@ -1,0 +1,146 @@
+
+#define __DELAY_BACKWARD_COMPATIBLE__
+#include <avr/io.h>
+#include <util/delay.h>			//딜레이 함수를 사용하기 위한 딜레이 해더 추가
+#include <avr/interrupt.h>			//인터럽트 허용 sei();를 쓰기위해 인터럽트 해더 추가
+
+static unsigned char fnd[10] =
+	{0x3f,0x06,0x5b,0x4f,0x66,0x6d,0x7d,0x07,0x7f,0x6f};	//fnd배열에 넣고싶은 표시값을 넣음
+static unsigned char fnd1[8] =
+	{0x7F,0x66,0x5B,0x06,0x3F,0x3F,0x3F,0x3F};		//fnd1배열에 넣고싶은 표시값을 넣음
+static unsigned char fnd2[8] =
+	{0x3F,0x3F,0x3F,0x3F,0x7F,0x66,0x5B,0x06};		//fnd2배열에 넣고싶은 표시값을 넣음
+volatile unsigned char puls,flag=0;				//flag변수와 배열을 증가시키는 변수 puls 지정
+int i,j,led;					//증가 변수 i,j led자리 증가 변수 지정
+int tik=500;				//딜레이 함수에 들어갈 변수 tik 초기값 500으로 지정
+int t=100;				//딜레이 함수에 들어갈 변수 t 초기값 100으로 지정
+
+void fnd_1(void)				//수자 증가 함수 지정
+{
+	for(j=0;j<10;j++)			//반복문 for을 사용하여 세그먼트 깜빡임 줄임
+	{
+		PORTD = ~0x10;		//1의 자리 세그먼트 증가
+		PORTC = ~fnd[puls%10];	//1의 자리 세그먼트에 fnd를 출력 
+		_delay_ms(t);
+		PORTD = ~0x20;		//10의 자리 세그먼트 증가
+		PORTC = ~fnd[(puls%100)/10];	//10의 자리 세그먼트에 fnd를 출력
+		_delay_ms(t);
+	}
+}
+void fnd_stop(void)			//세그먼트 일시 정지를 위함 함수 지정
+{
+	for(j=0;j<5;j++)			//반복문 for을 사용하여 세그먼트 깜빡임 줄임
+	{
+		PORTD = ~0x10;		//1의 자리 세그먼트 증가
+		PORTC = ~fnd[puls%10];
+		_delay_ms(50);
+		PORTD = ~0x20;		//10의 자리 세그먼트 증가
+		PORTC = ~fnd[(puls%100)/10];
+		_delay_ms(50);
+	}
+}
+void fnd_speed(void)			//10의 자리가 증가할때마다 세그먼트 숫자 증가 속도 빠르게 하는 함수
+{
+	tik=tik-((puls%100)/10);		//tik초기 값에 10의 자리 수에서 10을 나눈 나머지를 빼서 tik에 대입
+	for(j=0;j<5;j++)			//반복문 for을 사용하여 세그먼트 깜빡임 줄임
+	{
+		PORTD = ~0x10;		//1의 자리 세그먼트 증가
+		PORTC = ~fnd[puls%10];
+		_delay_ms(tik);		//tik만큼 딜레이
+		PORTD = ~0x20;		//10의 자리 세그먼트 증가
+		PORTC = ~fnd[(puls%100)/10];
+		_delay_ms(tik);		//tik만큼 딜레이
+	}
+}
+void fnd_boot(void)			//led_shift하는 동안 led의 위치가 0x땡떙인데 세그먼트에 떙땡을 숫자로 표현하기
+{
+	for(j=0;j<70;j++)			//반복문 for을 사용하여 세그먼트 깜빡임 줄임
+	{
+		PORTD = ~0x10;		//1의 자리 세그먼트 증가
+		PORTC = ~fnd2[i];		//1의 자리 세그먼트에 fnd2배열을 출력
+		_delay_ms(100);
+		PORTD = ~0x20;		//10의 자리 세그먼트 증가
+		PORTC = ~fnd1[i];		//10의 자리 세그먼트에 fnd1배열을 출력
+		_delay_ms(100);
+	}
+
+}
+ISR(INT0_vect)	//외부 인터럽트 int 0 서브루틴
+{
+	if((~PIND & 0x0f)==0x01)	//만약 1번 스위치가 눌려지면 flag=1로 지정
+	{
+		flag=1;
+	}
+}
+ISR(INT1_vect)	//외부 인터럽트 int 1 서브루틴
+{
+	if((~PIND & 0x0f)==0x02)	//만약 2번 스위치가 눌려지면 flag=0로 지정
+	{
+		flag=0;
+	}
+}
+ISR(INT2_vect)	//외부 인터럽트 int 2 서브루틴
+{
+	if((~PIND & 0x0f)==0x04)	//만약 3번 스위치가 눌려지면 flag=3로 지정
+	{
+		flag=3;
+	}
+}
+ISR(INT3_vect)	//외부 인터럽트 int 3 서브루틴
+{
+	if((~PIND&0x0f)==0x08)	//만약 4번 스위치가 눌려지면 flag=2로 지정
+	{
+		flag=2;
+	}
+}
+int main()
+{
+	DDRA=0xff;		
+	DDRC=0xff;		
+	DDRD=0x00;
+	EIMSK=0x0f;		//외부 인터럽트 마스크 레지스터 : 인터럽트를 int0~int3까지 사용
+	EICRA=0xaa;		//int0~int3까지 하강 모서리 인터럽트 요구
+	sei();			//인터럽트 허용
+
+	while(1)			//★무★한★반★복★
+	{
+		if(flag==0)	//flag변수가 0이 되면 조건문 실행
+		{
+			for(i=0;i<10;i++)	//반복문 for을 사용하여 세그먼트 깜빡임 줄임
+			{
+					fnd_stop();		//fnd_stop함수에 puls를 증가값없이 그대로 주어서 가만히 있도록 함
+
+			}
+		}
+		if(flag==1)	//flag변수가 1이 되면 조건문 실행
+		{
+			tik=500;
+			t=100;
+			fnd_1();	//숫자 증가를 위한 함수 호출
+			puls++;	//puls변수를 증가시켜 세그먼트 숫자 증가
+		}
+		else if(flag==2)	//flag변수가 2가 되면 조건문 실행
+		{
+				led = 0x80;	//led의 초기 출력 지정
+				for(i=0;i<8;i++)	//for문을 사용하여 i를 1씩 증가시켜 8번 반복
+				{
+					PORTA=~led;	//포트A에 led출력
+					fnd_boot();	//세그먼트에 떙땡을 숫자로 표현하는 함수 호출
+					led=(led>>1);	//led를 1비트 오른쪽으로 이동
+					_delay_ms(100);	//딜레이
+				}
+				PORTA=0xff;		//for문 다 돌면 led 끔
+		}
+		else if(flag==3)	//flag변수가 3이 되면 조건문 실행
+		{
+				fnd_speed();	//속도 빠르게 하는 함수 호출
+				puls++;		//puls변수 증가
+			if(puls==100)		//puls변수가 100이 되면 조건식 실행(계속해서 빨라지고 증가하는 것을 막기위해 사용)
+			{
+				puls=0;		//puls변수 0으로 지정
+				tik=500;		//tik변수 초기값으로 되돌림
+			}
+			
+		}
+	}
+}

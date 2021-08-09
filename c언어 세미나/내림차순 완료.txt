@@ -1,0 +1,29 @@
+//문자열을 10개 입력하면 큰수부터 내립차순으로 표시
+#include<stdio.h>
+#define SIZE 10
+int main(void)
+{
+	int n;
+	int list[SIZE];
+	for (n = 0; n < SIZE; n++)
+	{
+		printf("정수를 입력하시오 : ");
+		scanf_s("%d", &list[n]);
+	}
+	int i, j, tmp, max;
+	for (i = 0; i < SIZE - 1; i++)
+	{
+		max = i;
+
+		for (j = i + 1; j < SIZE; j++)
+			if (list[j] > list[max])
+				max = j;
+		tmp = list[i];
+		list[i] = list[max];
+		list[max] = tmp;
+	}
+	for (i = 0; i < SIZE; i++)
+		printf("%d\n", list[i]);
+	printf("\n");
+	return 0;
+}

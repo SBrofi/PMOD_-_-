@@ -1,0 +1,35 @@
+#include<stdio.h>
+
+int main(void)
+{
+	int a, b, c;
+	printf("정수1 : ");
+	scanf_s("%d", &a);
+	printf("정수2 : ");
+	scanf_s("%d", &b);
+	printf("정수3 : ");
+	scanf_s("%d", &c);
+	if (a > b && a > c) {
+		if (b > c)
+			printf("두번째로 큰 정수는 %d입니다.", b);
+		else if (c > b)
+			printf("두번째로 큰 정수는 %d입니다.", c);
+	}
+	else if (b > a && b > c) {
+		if (a > c)
+			printf("두번째로 큰 정수는 %d입니다.", a);
+		else if (c > a)
+			printf("두번쨰로 큰 정수는 %d입니다.", c);
+	}
+	else if (c > a && c > b) {
+		if (a > b)
+			printf("두번째로 큰 정수는 %d입니다.", a);
+		else if (b > a)
+			printf("두번쨰로 큰 정수는 %d입니다.", b);
+	}
+	else
+		printf("오류");
+
+	return 0;
+	
+}

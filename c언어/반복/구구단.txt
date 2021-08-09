@@ -1,0 +1,29 @@
+#include<stdio.h>
+
+int main(void)
+{
+	int num = 0;
+
+	while (1)
+	{
+		printf("\n구구단의 단을 입력하시오 : ");
+		scanf_s("%d", &num);
+
+		if (num < 10 && num > 0)
+		{
+			for (int n = 1 ; n <= 9; n++)
+			{
+				printf("\n %d * %d = %d\n", num, n, num*n);
+			}
+			printf("\n");
+			break;
+		}
+		else
+		{
+			printf("1~9만 가능합니다.");
+			continue;
+		}
+	}
+
+	return 0;
+}

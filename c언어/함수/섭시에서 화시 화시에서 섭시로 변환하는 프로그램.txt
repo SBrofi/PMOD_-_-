@@ -1,0 +1,40 @@
+#include<stdio.h>
+float C_undo(int num1)
+{
+	float tmp;
+	tmp = (num1 - 32) / 1.8;
+	return tmp;
+
+}
+float F_undo(int num1)
+{
+	float tmp;
+	tmp = (num1 * 1.8) + 32;
+	return tmp;
+
+}
+int main()
+{
+	int a;
+	int n;
+	printf("화씨를 섭씨로 변환하고 싶으면 0 , 섭씨를 화씨로 변환하고 싶으면 1을 입력하시오.");
+	scanf_s("%d", &n);
+	if (n == 0)
+	{
+		printf("화씨 온도를 입력하시오 : ");
+		scanf_s("%d", &a);
+		printf("화씨 온도 %d를 섭씨로 변환한 값은 %lf입니다.", a, C_undo(a));
+	}
+	else if (n == 1)
+	{
+		printf("섭씨 온도를 입력하시오 : ");
+		scanf_s("%d", &a);
+		printf("섭씨 온도 %d를 화씨로 변환한 값은 %lf입니다.", a, F_undo(a));
+	}
+	else
+	{
+		printf("오류입니다.");
+	}
+	
+	return 0;
+}

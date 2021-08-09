@@ -1,0 +1,57 @@
+#include <stdio.h>
+
+int main(void)
+{
+	int arr[20][20] = { 0 }; // arr 배열함수 초기화
+	int x = 0, y = 0, num_Plus = 0; // x, y 좌표 값
+	int n, cd; // input 변수, cd = Condition 변수
+	int i, j, l, k; // 위 아래 왼쪽 오른쪽 변수
+	int count = 0; // count 숫자 증가 변수
+
+
+	printf("숫자를 입력하시오 : ");
+	scanf_s("%d", &n);
+
+	cd = n;
+	while (1)
+	{
+		for (i = num_Plus; i < cd; i++) // 좌 -> 우
+		{
+			arr[y][i] = ++count;
+		}
+
+		for (j = num_Plus; j < cd - 1; ++j) // 위 -> 아래
+		{
+			arr[j + 1][i - 1] = ++count;
+		}
+
+		for (l = cd - 2; l >= num_Plus; l--) //우 -> 좌
+		{
+			arr[j][l] = ++count;
+		}
+
+		for (k = cd - 2; k > num_Plus; k--) // 아래 -> 위
+		{
+			arr[k][l + 1] = ++count;
+		}
+
+		num_Plus++; // 전체적으로 num_Plus 증가시켜 좌표위치 증가
+		y++;
+		cd--;
+		j += 2;
+
+		if (count == n * n)
+		{
+			for (y = 0; y < n; y++)
+			{
+				for (x = 0; x < n; x++)
+				{
+					printf("%3d", arr[y][x]);
+				}
+				printf("\n");
+			}
+			return 0;
+		}
+	}
+	return 0;
+}

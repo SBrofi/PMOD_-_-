@@ -1,0 +1,28 @@
+#include<stdio.h>
+#define SIZE 10
+int main(void)
+{
+	int n;
+	int list[SIZE];
+	for (n = 0; n < SIZE; n++)
+	{
+		printf("정수를 입력하시오 : ");
+		scanf_s("%d", &list[n]);
+	}
+	int i, j, tmp, least;
+	for (i = 0; i < SIZE - 1; i++)
+	{
+		least = i;
+
+		for (j = i + 1; j < SIZE; j++)
+			if (list[j] < list[least])
+				least = j;
+		tmp = list[i];
+		list[i] = list[least];
+		list[least] = tmp;
+	}
+	for (i = 0; i < SIZE; i++)
+		printf("%d\n", list[i]);
+	printf("\n");
+	return 0;
+}

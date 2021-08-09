@@ -1,0 +1,125 @@
+#define F_CPU 7372800UL
+#include <avr/io.h>
+#include <util/delay.h>
+#define CPU_CLOCK_HZ 7372800UL
+unsigned char tt[14]
+				={0x4d,0x49,0x43,0x52,0x4f,0x20,0x50,0x52,0x4f,0x43,0x45,0x53,0x53,0x20};		//아스키 코드들을 tt배열에 넣음
+void serial_init(unsigned long baud)				//보레이트 설정
+{
+	unsigned short ubrr;				//값 범위(0~255)
+	ubrr = (unsigned short) (CPU_CLOCK_HZ/(16*baud)-1);	//비동기 표준 모드
+	UBRR0H = (unsigned char)(ubrr >> 8);			//상위보레이트
+	UBRR0L = (unsigned char)(ubrr & 0xff);		//하위보레이트
+	UCSR0B = 0x98;					// RX완료 인터럽트 허용,수신부 가능 송신부 가능 (RX,TX 허용)
+	UCSR0C = 0x06;					// 비동기모드, 정지비트1bit, 문자크기8bit
+}
+void tx_str(unsigned char data)				//데이터 전송
+{
+	while((UCSR0A&0x20)==0x00);
+	UDR0 = data;					//버퍼에 data값을 넣음
+}
+char rx_str(void)						//데이터 수신 후 반환
+{
+	char data;
+	while((UCSR0A&0x80)==0x00);
+	data=UDR0;					//data에 버퍼값을 넣음
+	return UDR0;		
+}
+int main(void)
+{
+	DDRA = 0xFF;					//포트 A를 출력으로 설정
+	DDRD = 0x00;					//포트 D를 입력으로 설정
+	
+	PORTA = ~0xff;					//LED끔
+	char flag;
+	int i,data2=0;					//값범위 -32768~32768인 데이터 형 data,data1
+	unsigned char data,data1=0;
+	
+	ADMUX = 0x40;  			//ADC값을 오른쪽 정렬 , 싱글엔드 입력
+	ADCSRA = 0xE7; 			//ADC가능,ADC변환시작,프리러닝모드,인터럽트와 인터럽트 플래그 x,프리스케일러128
+	
+	serial_init(9600);
+	while(1) 
+    {
+		if((~PIND&0x0f)==0x01)
+		{
+			_delay_ms(200);
+			flag = 1;
+			PORTA=~0x00;
+		}
+		else if((~PIND&0X0f)==0X02)
+		{
+			_delay_ms(200);
+			flag = 2;
+		}
+		else if((~PIND&0X0f)==0X04)
+		{
+			_delay_ms(200);
+			flag = 3;
+		}
+		
+		if(flag == 1)
+		{
+			while(!(UCSR0A&0x80)==0x00)		//버퍼에 데이터가 있으면 반복
+			data1=UDR0;				//data1에 버퍼를 씌움
+			_delay_ms(50);
+				if(data1==0x31)			//data1값이 '1'이면 led 1번을 켬
+				{
+					PORTA=~0x01;
+				}
+				else if(data1==0x32)		//data1값이 '2'이면 led 2번을 켬
+				{
+					PORTA=~0x02;
+				}
+				else if(data1==0x33)		//data1값이 '3'이면 led 3번을 켬
+				{
+					PORTA=~0x04;
+				}
+				else if(data1==0x34)		//data1값이 '4'이면 led 4번을 켬
+				{
+					PORTA=~0x08;
+				}
+				else if(data1==0x35)		//data1값이 '5'이면 led 5번을 켬
+				{
+					PORTA=~0x10;
+				}
+				else if(data1==0x36)		//data1값이 '6'이면 led 6번을 켬
+				{
+					PORTA=~0x20;
+				}
+				else if(data1==0x37)		//data1값이 '7'이면 led 7번을 켬
+				{
+					PORTA=~0x40;
+				}
+				else if(data1==0x38)		//data1값이 '8'이면 led 8번을 켬
+				{
+					PORTA=~0x80;
+				}
+		}
+		else if(flag==2)
+		{
+			data2=ADC;				//정수형 변수 data2에 ADC값을 씌움 
+			tx_str((data2%10000)/1000+'0');		//1000의 자리 데이터를 버퍼에 씌운후 serial로 전송
+			tx_str((data2%1000)/100+'0');			//100의 자리 데이터를 버퍼에 씌운후 serial로 전송
+			tx_str((data2%100)/10+'0');			//10의 자리 데이터를 버퍼에 씌운후 serial로 전송
+			tx_str((data2%10)+'0');			//1의 자리 데이터를 버퍼에 씌운후 serial로 전송
+			tx_str(0x20);				//아스키 코드 'SP' 
+			tx_str(0x4f);				//아스키 코드 'O' 
+			tx_str(0x68);				//아스키 코드 'h' 
+			tx_str(0x6d);				//아스키 코드 'm' 
+			tx_str(0x0D);				//아스키 코드 'CR'
+			_delay_ms(200);
+		}
+		else if(flag==3)
+		{
+			for(i=0;i<14;i++)				//반복을하여 tt배열에 있는 아스키 코드들을 serial로 전송
+			{
+				tt[i];
+				data=tt[i];			//data에 tt[i]배열을 씌움
+				tx_str(data);			//data를 전송
+			}
+			tx_str(0x0D);				//아스키 코드 'CR'
+			_delay_ms(1000);
+		}
+	}
+}

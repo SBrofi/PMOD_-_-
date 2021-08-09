@@ -1,0 +1,22 @@
+
+#include <avr/io.h>
+#include <util/delay.h>
+unsigned char led=0;
+int main()
+{
+	int i=0;
+  	DDRA=0xFF;
+	PORTA=0x00;
+	DDRD=0x00;
+	while(1)
+	{
+		if(~PIND&0x01)
+		led=0x80;
+		for(i=0;i<7;i++)
+		{
+			PORTA=~led;
+			led=(led>>1);
+			_delay_ms(1000);
+		}
+	}
+}

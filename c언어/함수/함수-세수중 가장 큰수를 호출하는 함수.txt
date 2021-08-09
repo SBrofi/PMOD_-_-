@@ -1,0 +1,27 @@
+#include<stdio.h>
+int get_max(int x, int y,int z);
+
+int main()
+{
+	int a, b, c;
+
+	printf("정수1 : ");
+	scanf_s("%d", &a);
+	printf("정수2 : ");
+	scanf_s("%d", &b);
+	printf("정수3 : ");
+	scanf_s("%d", &c);
+	printf("두수중 큰수는 %d입니다.", get_max(a, b, c));
+	return 0;
+}
+int get_max(int x, int y,int z)
+{
+	if (x > y && x > z)
+		return(x);
+	else if (y > x && y > z)
+		return(y);
+	else if (z > x && z > y)
+		return(z);
+	else
+		printf("오류");
+}

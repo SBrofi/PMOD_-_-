@@ -1,0 +1,97 @@
+#define F_CPU 7372800UL
+#include <avr/io.h>
+#include <avr/interrupt.h>
+#include <util/delay.h>
+volatile uint16_t total_overflow_count;
+int led1,count,flag,ps,i,x,y=0;
+int pass=1;
+int psward[4]={2,4,8,1};
+int ward[4]={0,0,0,0};
+ISR(TIMER0_OVF_vect)
+{
+    total_overflow_count++;
+    TCNT0 = 142;
+	if(flag!=0)
+	{
+		if ( total_overflow_count==3000 ) //1초마다 LED 켜짐
+		{
+			total_overflow_count=0;
+			led1=led1<<1;
+			led1++;
+			PORTA=led1;
+			count++;
+			if(count==9)
+			{
+				led1=~0xff;
+				PORTA=led1;
+				OCR1A = 60;	
+				count,total_overflow_count,flag,i,y=0;
+			}
+		}
+	}
+}
+
+int Timer_Init(void)
+{
+	TCCR1A = (1 << COM1A1) | (1 << WGM11); // Clear OC1A on Compare match, set Fast PWM
+	TCCR1B = (1 << WGM13) | (1 << WGM12) | (1 << CS11) | (1 << CS10); // Prescaler 64
+	ICR1 = 2303; // FAST PWM의 TOP은 ICR1로 설정
+	OCR1A = 60; // 초기각도 (7372800/64)*0.7 값 모터를 오른쪽으로 90도 돌림
+	TCNT1 = 0X00; // Strating point
+}
+
+int main(void)
+{
+	DDRA = 0XFF;
+	DDRB = 0xFF;
+	DDRD = 0x00; 
+	PORTA = ~0XFF;
+	PORTB = 0x00;
+	Timer_Init();
+	TCCR0 |= (1<<CS02);
+    TCNT0 = 142;
+    TIMSK |= (1<<TOIE0);
+	sei();
+	while(1)
+	{
+		for(i=0;i<4;i++)
+		{
+			while(!(~PIND&0x0f));
+			ward[i]=(~PIND&0x0f);
+			_delay_ms(500);
+			if(ward[i]==0) i--;
+			else flag=1;
+			y++;
+			if(y==4)
+			{
+				i,y=0;
+				pass=1;	
+				for(x=0;x<4;x++)
+				{
+					pass = pass && (ward[x]==psward[x]);	
+				}	
+				if(pass==1)
+				{
+					OCR1A = 160;		//각도 (7372800/64)*1.5 값 모터를 중앙으로 90도 돌림
+					flag=1;
+					int ward[4]={0,0,0,0};
+				}
+				else
+				{
+					OCR1A = 60;		// (7372800/64)*0.7 값 모터를 오른쪽으로 90도 돌림
+					for(ps=0;ps<4;ps++)
+					{	
+						flag=1;
+
+						led1=~0x00;
+						PORTA=led1;
+						_delay_ms(100);
+						led1=~0xff;
+						PORTA=led1;
+						_delay_ms(100);
+					}
+				}
+			}
+		}			
+	}
+}

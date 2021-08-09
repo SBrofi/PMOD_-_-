@@ -1,0 +1,16 @@
+#include<stdio.h>
+
+int main(void)
+{
+	int num = 0;
+	int tmp = 0;
+	printf("\n어디까지 출력할지 입력하시오 : ");
+	scanf("%d", &num);
+	for (int n = 1; n <= num; n++)
+	{
+		tmp = tmp + n;
+	}
+	printf("1부터 %d까지의 합은 : %d\n",num , tmp);
+	printf("\n");
+	return 0;
+}

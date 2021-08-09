@@ -1,0 +1,14 @@
+else if((~PIND&0x0F)==0x04)
+		{
+			led=~0x80;
+			t=4000;
+			for(i=0;i<8;i++)
+			{
+				PORTA=~led;
+				led=(led>>1);
+				_delay_ms(t);
+				t=t/2;
+			}
+			i=0;
+			_delay_ms(2000);
+		}
